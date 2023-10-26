@@ -7,10 +7,10 @@ export default function AdminIndexRoute() {
 
 export const meta: MetaFunction = () => {
 	return [
-		{ title: `Admin | Epic Notes` },
+		{ title: `Admin | PatN XYZ` },
 		{
 			name: 'description',
-			content: `Admin page for Epic Notes`,
+			content: `Admin page for PatN XYZ`,
 		},
 	]
 }
