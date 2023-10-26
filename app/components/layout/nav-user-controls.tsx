@@ -1,5 +1,3 @@
-import { Link } from '@remix-run/react'
-import { Button } from '#app/components/index.ts'
 import { getUserImgSrc } from '#app/utils/misc.tsx'
 import { useOptionalUser, useUser } from '#app/utils/user.ts'
 import DropdownNavigation from '../templates/dropdown-navigation.tsx'
@@ -36,15 +34,7 @@ function NavUserControls() {
 	}
 
 	return (
-		<div className="flex items-center gap-10">
-			{user ? (
-				<UserDropdown />
-			) : (
-				<Button asChild variant="default" size="sm">
-					<Link to="/login">Log In</Link>
-				</Button>
-			)}
-		</div>
+		<div className="flex items-center gap-10">{user && <UserDropdown />}</div>
 	)
 }
 

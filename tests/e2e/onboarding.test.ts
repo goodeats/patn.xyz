@@ -35,9 +35,10 @@ const test = base.extend<{
 test('onboarding with link', async ({ page, getOnboardingData }) => {
 	const onboardingData = getOnboardingData()
 
-	await page.goto('/')
+	// hiding login on the homepage
+	await page.goto('/login')
 
-	await page.getByRole('link', { name: /log in/i }).click()
+	// await page.getByRole('link', { name: /log in/i }).click()
 	await expect(page).toHaveURL(`/login`)
 
 	const createAccountLink = page.getByRole('link', {

@@ -24,7 +24,7 @@ export default function Index() {
 									className="block uppercase text-white drop-shadow-md"
 									href="https://github.com/goodeats/patn.xyz"
 								>
-									<span>{'pat(n).xyz()'}</span>
+									<span>{'pat(n).xyz( )'}</span>
 								</a>
 							</h1>
 							<p className="mx-auto mt-6 max-w-lg rounded-lg bg-primary p-3 text-center text-xl text-primary-foreground sm:max-w-3xl">
