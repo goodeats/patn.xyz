@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# validate runs test:e2e:run won't run if port 3000 is already in use
+if lsof -Pi :3000 -sTCP:LISTEN -t >/dev/null ; then
+    echo "🚨🚨🚨"
+    echo "Port 3000 is already in use, please close the process and try again."
+    echo "🤡🤡🤡"
+    exit 1
+else
+    npm run build
+    npm run validate
+fi
