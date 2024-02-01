@@ -1,9 +1,11 @@
 import { conform, useForm } from '@conform-to/react'
 import { getFieldsetConstraint, parse } from '@conform-to/zod'
+import { invariant } from '@epic-web/invariant'
 import {
 	json,
 	redirect,
-	type DataFunctionArgs,
+	type LoaderFunctionArgs,
+	type ActionFunctionArgs,
 	type MetaFunction,
 } from '@remix-run/node'
 import {
@@ -19,20 +21,20 @@ import {
 	CheckboxField,
 	ErrorList,
 	Field,
-	Spacer,
 	StatusButton,
 } from '#app/components/index.ts'
+import { Spacer } from '#app/components/spacer.tsx'
 import {
 	authenticator,
 	requireAnonymous,
 	sessionKey,
 	signupWithConnection,
 } from '#app/utils/auth.server.ts'
-import { redirectWithConfetti } from '#app/utils/confetti.server.ts'
 import { ProviderNameSchema } from '#app/utils/connections.tsx'
 import { prisma } from '#app/utils/db.server.ts'
-import { invariant, useIsPending } from '#app/utils/misc.tsx'
+import { useIsPending } from '#app/utils/misc.tsx'
 import { authSessionStorage } from '#app/utils/session.server.ts'
+import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { NameSchema, UsernameSchema } from '#app/utils/user-validation.ts'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import { type VerifyFunctionArgs } from './verify.tsx'
@@ -80,7 +82,7 @@ async function requireData({
 	}
 }
 
-export async function loader({ request, params }: DataFunctionArgs) {
+export async function loader({ request, params }: LoaderFunctionArgs) {
 	const { email } = await requireData({ request, params })
 	const authSession = await authSessionStorage.getSession(
 		request.headers.get('cookie'),
@@ -105,7 +107,7 @@ export async function loader({ request, params }: DataFunctionArgs) {
 	})
 }
 
-export async function action({ request, params }: DataFunctionArgs) {
+export async function action({ request, params }: ActionFunctionArgs) {
 	const { email, providerId, providerName } = await requireData({
 		request,
 		params,
@@ -166,7 +168,11 @@ export async function action({ request, params }: DataFunctionArgs) {
 		await verifySessionStorage.destroySession(verifySession),
 	)
 
-	return redirectWithConfetti(safeRedirect(redirectTo), { headers })
+	return redirectWithToast(
+		safeRedirect(redirectTo),
+		{ title: 'Welcome', description: 'Thanks for signing up!' },
+		{ headers },
+	)
 }
 
 export async function handleVerification({ submission }: VerifyFunctionArgs) {
@@ -181,7 +187,7 @@ export async function handleVerification({ submission }: VerifyFunctionArgs) {
 }
 
 export const meta: MetaFunction = () => {
-	return [{ title: 'Setup PatN XYZ Account' }]
+	return [{ title: 'Setup Epic Notes Account' }]
 }
 
 export default function SignupRoute() {
@@ -213,7 +219,7 @@ export default function SignupRoute() {
 				<Spacer size="xs" />
 				<Form
 					method="POST"
-					className="mx-auto min-w-[368px] max-w-sm"
+					className="mx-auto min-w-full max-w-sm sm:min-w-[368px]"
 					{...form.props}
 				>
 					{fields.imageUrl.defaultValue ? (

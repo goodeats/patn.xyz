@@ -1,12 +1,14 @@
 import { conform, useForm } from '@conform-to/react'
 import { getFieldsetConstraint, parse } from '@conform-to/zod'
+import { invariantResponse } from '@epic-web/invariant'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import {
 	json,
 	redirect,
 	unstable_createMemoryUploadHandler,
 	unstable_parseMultipartFormData,
-	type DataFunctionArgs,
+	type LoaderFunctionArgs,
+	type ActionFunctionArgs,
 } from '@remix-run/node'
 import {
 	Form,
@@ -17,13 +19,12 @@ import {
 import { useState } from 'react'
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react'
 import { z } from 'zod'
-import { Button, ErrorList, Icon, StatusButton } from '#app/components/index.ts'
+import { Button, Icon, ErrorList, StatusButton } from '#app/components/index.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { validateCSRF } from '#app/utils/csrf.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import {
 	getUserImgSrc,
-	invariantResponse,
 	useDoubleCheck,
 	useIsPending,
 } from '#app/utils/misc.tsx'
@@ -50,7 +51,7 @@ const NewImageSchema = z.object({
 
 const PhotoFormSchema = z.union([DeleteImageSchema, NewImageSchema])
 
-export async function loader({ request }: DataFunctionArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)
 	const user = await prisma.user.findUnique({
 		where: { id: userId },
@@ -65,7 +66,7 @@ export async function loader({ request }: DataFunctionArgs) {
 	return json({ user })
 }
 
-export async function action({ request }: DataFunctionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
 	const userId = await requireUserId(request)
 	const formData = await unstable_parseMultipartFormData(
 		request,
@@ -102,13 +103,24 @@ export async function action({ request }: DataFunctionArgs) {
 		return redirect('/settings/profile')
 	}
 
-	await prisma.$transaction(async $prisma => {
-		await $prisma.userImage.deleteMany({ where: { userId } })
-		await $prisma.user.update({
+	// keeping to document differences with current epic stack
+	// await prisma.$transaction(async $prisma => {
+	// 	// Property 'userImage' does not exist on type 'Omit<PrismaClient<PrismaClientOptions, never, $Extensions.DefaultArgs>, runtime.ITXClientDenyList>'.
+	// 	await $prisma.userImage.deleteMany({ where: { userId } })
+	// 	await $prisma.user.update({
+	// 		where: { id: userId },
+	// 		data: { image: { create: image } },
+	// 	})
+	// })
+
+	// https://www.prisma.io/docs/orm/prisma-client/queries/transactions#the-transaction-api
+	await prisma.$transaction([
+		prisma.userImage.deleteMany({ where: { userId } }),
+		prisma.user.update({
 			where: { id: userId },
 			data: { image: { create: image } },
-		})
-	})
+		}),
+	])
 
 	return redirect('/settings/profile')
 }
@@ -186,7 +198,7 @@ export default function PhotoRoute() {
 					/>
 					<Button
 						asChild
-						className="cursor-pointer peer-valid:hidden peer-focus-within:ring-4 peer-focus-visible:ring-4"
+						className="cursor-pointer peer-valid:hidden peer-focus-within:ring-2 peer-focus-visible:ring-2"
 					>
 						<label htmlFor={fields.photoFile.id}>
 							<Icon name="pencil-1">Change</Icon>
@@ -201,8 +213,8 @@ export default function PhotoRoute() {
 							pendingIntent === 'submit'
 								? 'pending'
 								: lastSubmissionIntent === 'submit'
-								? actionData?.status ?? 'idle'
-								: 'idle'
+									? actionData?.status ?? 'idle'
+									: 'idle'
 						}
 					>
 						Save Photo
@@ -227,8 +239,8 @@ export default function PhotoRoute() {
 								pendingIntent === 'delete'
 									? 'pending'
 									: lastSubmissionIntent === 'delete'
-									? actionData?.status ?? 'idle'
-									: 'idle'
+										? actionData?.status ?? 'idle'
+										: 'idle'
 							}
 						>
 							<Icon name="trash">

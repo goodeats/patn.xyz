@@ -124,7 +124,7 @@ export async function cleanupDb(prisma: PrismaClient) {
 		// Disable FK constraints to avoid relation conflicts during deletion
 		prisma.$executeRawUnsafe(`PRAGMA foreign_keys = OFF`),
 		// Delete all rows from each table, preserving table structures
-		...tables.map(({ name }) =>
+		...tables.map(({ name }: { name: string }) =>
 			prisma.$executeRawUnsafe(`DELETE from "${name}"`),
 		),
 		prisma.$executeRawUnsafe(`PRAGMA foreign_keys = ON`),

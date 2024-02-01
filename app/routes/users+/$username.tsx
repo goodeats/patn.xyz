@@ -1,18 +1,15 @@
-import { json, type DataFunctionArgs } from '@remix-run/node'
+import { invariantResponse } from '@epic-web/invariant'
+import { json, type LoaderFunctionArgs } from '@remix-run/node'
 import { Form, Link, useLoaderData, type MetaFunction } from '@remix-run/react'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { Button, Icon, Spacer } from '#app/components/index.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
-import {
-	formatDate,
-	getUserImgSrc,
-	invariantResponse,
-} from '#app/utils/misc.tsx'
+import { getUserImgSrc } from '#app/utils/misc.tsx'
 import { userHasRole } from '#app/utils/permissions.ts'
 import { useOptionalUser } from '#app/utils/user.ts'
 
-export async function loader({ request, params }: DataFunctionArgs) {
+export async function loader({ request, params }: LoaderFunctionArgs) {
 	await requireUserId(request)
 	const user = await prisma.user.findFirst({
 		select: {
@@ -35,7 +32,7 @@ export async function loader({ request, params }: DataFunctionArgs) {
 	return json({
 		user,
 		isAdmin,
-		userJoinedDisplay: formatDate(new Date(user.createdAt)),
+		userJoinedDisplay: user.createdAt.toLocaleDateString(),
 	})
 }
 
