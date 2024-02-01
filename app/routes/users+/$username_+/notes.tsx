@@ -1,4 +1,5 @@
-import { json, type DataFunctionArgs } from '@remix-run/node'
+import { invariantResponse } from '@epic-web/invariant'
+import { json, type LoaderFunctionArgs } from '@remix-run/node'
 import { Outlet, useLoaderData } from '@remix-run/react'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import {
@@ -8,9 +9,8 @@ import {
 } from '#app/components/layout/index.ts'
 import { PageSidebar } from '#app/components/templates/index.ts'
 import { prisma } from '#app/utils/db.server.ts'
-import { invariantResponse } from '#app/utils/misc.tsx'
 
-export async function loader({ params }: DataFunctionArgs) {
+export async function loader({ params }: LoaderFunctionArgs) {
 	const owner = await prisma.user.findFirst({
 		select: {
 			id: true,

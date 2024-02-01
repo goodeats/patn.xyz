@@ -1,3 +1,4 @@
+import { type Permission, type Role } from '@prisma/client'
 import { json } from '@remix-run/node'
 import { requireUserId } from './auth.server.ts'
 import { prisma } from './db.server.ts'
@@ -82,9 +83,9 @@ export function userHasPermission(
 ) {
 	if (!user) return false
 	const { action, entity, access } = parsePermissionString(permission)
-	return user.roles.some(role =>
+	return user.roles.some((role: Role) =>
 		role.permissions.some(
-			permission =>
+			(permission: Permission) =>
 				permission.entity === entity &&
 				permission.action === action &&
 				(!access || access.includes(permission.access)),
@@ -97,5 +98,5 @@ export function userHasRole(
 	role: string,
 ) {
 	if (!user) return false
-	return user.roles.some(r => r.name === role)
+	return user.roles.some((r: Role) => r.name === role)
 }

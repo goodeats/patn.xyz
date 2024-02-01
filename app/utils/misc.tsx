@@ -42,22 +42,19 @@ function formatColors() {
 	return colors
 }
 
-const customTwMerge = extendTailwindMerge({
-	theme: {
-		colors: formatColors(),
-		borderRadius: Object.keys(extendedTheme.borderRadius),
-	},
-	classGroups: {
-		'font-size': [
-			{
-				text: Object.keys(extendedTheme.fontSize),
-			},
-		],
-		animate: [
-			{
-				animate: Object.keys(extendedTheme.animation),
-			},
-		],
+const customTwMerge = extendTailwindMerge<string, string>({
+	extend: {
+		theme: {
+			colors: formatColors(),
+			borderRadius: Object.keys(extendedTheme.borderRadius),
+		},
+		classGroups: {
+			'font-size': [
+				{
+					text: Object.keys(extendedTheme.fontSize),
+				},
+			],
+		},
 	},
 })
 
@@ -135,59 +132,6 @@ export function combineResponseInits(
 		}
 	}
 	return combined
-}
-
-/**
- * Provide a condition and if that condition is falsey, this throws an error
- * with the given message.
- *
- * inspired by invariant from 'tiny-invariant' except will still include the
- * message in production.
- *
- * @example
- * invariant(typeof value === 'string', `value must be a string`)
- *
- * @param condition The condition to check
- * @param message The message to throw (or a callback to generate the message)
- * @param responseInit Additional response init options if a response is thrown
- *
- * @throws {Error} if condition is falsey
- */
-export function invariant(
-	condition: any,
-	message: string | (() => string),
-): asserts condition {
-	if (!condition) {
-		throw new Error(typeof message === 'function' ? message() : message)
-	}
-}
-
-/**
- * Provide a condition and if that condition is falsey, this throws a 400
- * Response with the given message.
- *
- * inspired by invariant from 'tiny-invariant'
- *
- * @example
- * invariantResponse(typeof value === 'string', `value must be a string`)
- *
- * @param condition The condition to check
- * @param message The message to throw (or a callback to generate the message)
- * @param responseInit Additional response init options if a response is thrown
- *
- * @throws {Response} if condition is falsey
- */
-export function invariantResponse(
-	condition: any,
-	message: string | (() => string),
-	responseInit?: ResponseInit,
-): asserts condition {
-	if (!condition) {
-		throw new Response(typeof message === 'function' ? message() : message, {
-			status: 400,
-			...responseInit,
-		})
-	}
 }
 
 /**
@@ -342,27 +286,4 @@ export async function downloadFile(url: string, retries: number = 0) {
 		if (retries > MAX_RETRIES) throw e
 		return downloadFile(url, retries + 1)
 	}
-}
-
-/**
- * Compare two strings ignoring line breaks
- */
-export function compareStringsIgnoreLineBreaks(
-	str1: string,
-	str2: string,
-): boolean {
-	str1 = str1.replace(/\r?\n|\r/g, '')
-	str2 = str2.replace(/\r?\n|\r/g, '')
-	return str1 === str2
-}
-
-/**
- * Format a date to mm/dd/yyyy
- */
-export function formatDate(date: Date): string {
-	const day = date.getDate().toString().padStart(2, '0')
-	const month = (date.getMonth() + 1).toString().padStart(2, '0') // Months are 0 based
-	const year = date.getFullYear()
-
-	return `${month}/${day}/${year}`
 }

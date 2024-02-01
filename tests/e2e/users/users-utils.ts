@@ -1,7 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 import { type User } from '@prisma/client'
 import { prisma } from '#app/utils/db.server.ts'
-import { formatDate } from '#app/utils/misc.tsx'
 import {
 	expectButton,
 	expectLink,
@@ -52,7 +51,7 @@ async function expectUserHeading(page: Page, username: string) {
 }
 
 async function expectUserJoinedDate(page: Page, date: Date) {
-	const dateFormatted = `Joined ${formatDate(date)}`
+	const dateFormatted = `Joined ${date.toLocaleDateString()}`
 	await expect(page.getByText(dateFormatted, { exact: false })).toBeVisible()
 }
 

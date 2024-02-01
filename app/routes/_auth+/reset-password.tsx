@@ -1,21 +1,19 @@
 import { conform, useForm } from '@conform-to/react'
 import { getFieldsetConstraint, parse } from '@conform-to/zod'
+import { invariant } from '@epic-web/invariant'
 import {
 	json,
 	redirect,
-	type DataFunctionArgs,
+	type LoaderFunctionArgs,
+	type ActionFunctionArgs,
 	type MetaFunction,
 } from '@remix-run/node'
 import { Form, useActionData, useLoaderData } from '@remix-run/react'
-import {
-	ErrorList,
-	Field,
-	GeneralErrorBoundary,
-	StatusButton,
-} from '#app/components/index.ts'
+import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
+import { ErrorList, Field, StatusButton } from '#app/components/index.ts'
 import { requireAnonymous, resetUserPassword } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
-import { invariant, useIsPending } from '#app/utils/misc.tsx'
+import { useIsPending } from '#app/utils/misc.tsx'
 import { PasswordAndConfirmPasswordSchema } from '#app/utils/user-validation.ts'
 import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import { type VerifyFunctionArgs } from './verify.tsx'
@@ -61,12 +59,12 @@ async function requireResetPasswordUsername(request: Request) {
 	return resetPasswordUsername
 }
 
-export async function loader({ request }: DataFunctionArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
 	const resetPasswordUsername = await requireResetPasswordUsername(request)
 	return json({ resetPasswordUsername })
 }
 
-export async function action({ request }: DataFunctionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
 	const resetPasswordUsername = await requireResetPasswordUsername(request)
 	const formData = await request.formData()
 	const submission = parse(formData, {
@@ -90,7 +88,7 @@ export async function action({ request }: DataFunctionArgs) {
 }
 
 export const meta: MetaFunction = () => {
-	return [{ title: 'Reset Password | PatN XYZ' }]
+	return [{ title: 'Reset Password | PatN.XYZ' }]
 }
 
 export default function ResetPasswordPage() {
@@ -116,7 +114,7 @@ export default function ResetPasswordPage() {
 					Hi, {data.resetPasswordUsername}. No worries. It happens all the time.
 				</p>
 			</div>
-			<div className="mx-auto mt-16 min-w-[368px] max-w-sm">
+			<div className="mx-auto mt-16 min-w-full max-w-sm sm:min-w-[368px]">
 				<Form method="POST" {...form.props}>
 					<Field
 						labelProps={{
